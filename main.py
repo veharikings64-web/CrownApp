@@ -6,9 +6,8 @@ import threading
 from datetime import datetime
 
 # --- CONFIG ---
-# GANTI DENGAN TOKEN & ID TELEGRAM LO
-TELEGRAM_BOT_TOKEN = "TOKEN_BOT_DISINI"
-TELEGRAM_CHAT_ID = "ID_TELEGRAM_DISINI"
+TELEGRAM_BOT_TOKEN = "8283768042:AAFZ_5OXTS-1SCDuV9m9ixhmZYDMXbny9b0" # Ganti Token Lo
+TELEGRAM_CHAT_ID = "5642195388" # Ganti ID Lo
 SECRET_SALT = "CROWN_WIN_TRICKS_SECRET"
 
 class CasinoApp:
@@ -21,7 +20,7 @@ class CasinoApp:
         self.page.window_width = 400
         self.page.window_height = 800
         
-        # --- VARIABLES ---
+        # VARIABLES
         self.history = []
         self.start_capital = 0
         self.base_bet = 0
@@ -33,8 +32,6 @@ class CasinoApp:
         self.last_pred = None
         
         self.device_id = self.get_or_create_device_id()
-
-        # UI COMPONENTS
         self.init_login_ui()
 
     def get_or_create_device_id(self):
@@ -53,7 +50,7 @@ class CasinoApp:
     def send_report(self, ref_id):
         def _send():
             try:
-                msg = f"📱 **NEW LOGIN!**\nApp: 3 Patti Crown\nUser: {ref_id}\nID: {self.device_id}\nTime: {datetime.now()}"
+                msg = f"📱 **LOGIN SUCCESS!**\nApp: 3 Patti Crown\nUser: {ref_id}\nID: {self.device_id}\nTime: {datetime.now()}"
                 url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
                 requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": msg})
             except: pass
@@ -64,7 +61,7 @@ class CasinoApp:
     def init_login_ui(self):
         self.page.clean()
         
-        self.txt_ref = ft.TextField(label="Referral ID / Game ID", text_align="center", width=300, border_color="#f1c40f")
+        self.txt_ref = ft.TextField(label="Game ID / Referral", text_align="center", width=300, border_color="#f1c40f")
         self.txt_key = ft.TextField(label="License Key", text_align="center", width=300, border_color="#f1c40f")
         self.lbl_id = ft.Text(f"DEVICE ID: {self.device_id}", color="grey", size=12)
         
@@ -113,19 +110,19 @@ class CasinoApp:
             padding=15, bgcolor="black", border_radius=10, width=350
         )
 
-        # PREDIKSI
-        self.lbl_pred = ft.Text("SETUP FIRST", size=35, weight="bold", color="grey") # Font agak kecilin biar muat
+        # PREDIKSI (Updated Label)
+        self.lbl_pred = ft.Text("SETUP FIRST", size=35, weight="bold", color="grey")
         self.lbl_amount = ft.Text("Rs 0", size=20, color="#00cec9")
         self.lbl_status = ft.Text("Waiting...", color="grey")
 
         card_main = ft.Container(
             content=ft.Column([
-                ft.Text("PREDICTION:", size=12, color="grey", weight="bold"), # Label Ganti
+                ft.Text("PREDICTION:", size=14, color="#bdc3c7", weight="bold"), # <-- LABEL BARU
                 self.lbl_pred,
                 self.lbl_amount,
                 self.lbl_status
             ], alignment="center", horizontal_alignment="center"),
-            padding=20, bgcolor="#2d3436", border_radius=10, width=350, height=200
+            padding=20, bgcolor="#2d3436", border_radius=10, width=350, height=220
         )
 
         # TOMBOL WIN/LOSS
@@ -142,7 +139,6 @@ class CasinoApp:
         btn_x = ft.ElevatedButton("Tie", on_click=lambda e: self.manual_input("X"), bgcolor="#55efc4", width=60)
         
         row_manual = ft.Row([btn_d, btn_x, btn_t], alignment=ft.MainAxisAlignment.CENTER)
-
         btn_reset = ft.ElevatedButton("RESET GAME", on_click=self.reset_click, bgcolor="#e67e22", color="white", width=300)
 
         self.page.add(
@@ -162,7 +158,6 @@ class CasinoApp:
         )
 
     # ================= LOGIC FUNCTIONS =================
-
     def login_click(self, e):
         ref = self.txt_ref.value
         key = self.txt_key.value
@@ -171,7 +166,6 @@ class CasinoApp:
             self.page.snack_bar.open = True
             self.page.update()
             return
-            
         if self.verify_key(key):
             self.send_report(ref)
             self.init_main_ui()
@@ -193,15 +187,12 @@ class CasinoApp:
             self.btn_lock.disabled = True
             self.btn_win.disabled = False
             self.btn_loss.disabled = False
-            
             self.update_ui()
             self.run_logic()
         except: pass
 
     def update_ui(self):
         self.lbl_balance.value = f"BAL: Rs {self.current_balance:,}"
-        
-        # Cek Target
         if self.profit >= self.target_profit:
             self.lbl_profit.value = "TARGET REACHED! WITHDRAW!"
             self.lbl_profit.color = "#00ff00"
@@ -247,11 +238,9 @@ class CasinoApp:
         self.init_main_ui()
 
     def run_logic(self):
-        # SAFETY SNIPER LOGIC
         data = [x for x in self.history if x != 'X']
         pred = "WAIT"
         color = "grey"
-        
         if len(data) >= 3:
             last_1 = data[-1]
             if data[-3:] == [last_1] * 3:
@@ -260,11 +249,9 @@ class CasinoApp:
             elif data[-1] != data[-2] and data[-2] != data[-3]:
                 pred = "TIGER" if last_1 == 'D' else "DRAGON"
                 color = "#74b9ff" if pred == "TIGER" else "#ff7675"
-
         self.last_pred = pred
         self.lbl_pred.value = pred
         self.lbl_pred.color = color
-        
         if pred == "WAIT":
             self.lbl_amount.value = "DO NOT BET"
             self.lbl_status.value = "Waiting for pattern..."
@@ -275,7 +262,6 @@ class CasinoApp:
             self.lbl_status.value = "Pattern Detected!"
             self.btn_win.disabled = False
             self.btn_loss.disabled = False
-        
         self.page.update()
 
 def main(page: ft.Page):
